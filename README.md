@@ -5,10 +5,10 @@ Sensirion **SHT45** (±1.0 %RH, ±0.1 °C, I²C) nem ve sıcaklık sensörü iç
 
 | Özellik | Değer |
 |---|---|
-| Kart boyutu | **10.2 × 12.5 mm**, 2 katman, 1.6 mm FR4 |
+| Kart boyutu | **16.0 × 19.8 mm**, 2 katman, 1.6 mm FR4, 2 adet M2 montaj deliği |
 | Besleme | **1.08 … 3.6 V** (5 V ile çalışmaz, aşağıya bakın) |
 | Arayüz | I²C, adres **0x44** (SHT45-AD1B), en fazla 1 MHz (Fm+) |
-| Konnektör | 1×4, 2.54 mm pin header: `VCC GND SCL SDA` |
+| Konnektör | J1: 1×4, 2.54 mm pin header, J2: 4 pinli JST XH (2.50 mm). İkisinde de sıra `VCC GND SCL SDA` |
 | Parçalar | U1 SHT45 (DFN-4 1.5×1.5), C1 100 nF 0603, R1/R2 10 kΩ 0603, JP1 lehim köprüsü |
 
 ![Üst yüz](docs/gerber_top.png) ![Alt yüz](docs/gerber_bottom.png)
@@ -30,8 +30,8 @@ SHT4x* ve *Heater Decontamination SHT4x* ([ürün sayfası](https://sensirion.co
    yatay aralık (KiCad'deki `Sensirion_DFN-4_…_SHT4x_NoCentralPad` footprint'i).
    **Orta pad (die pad) lehimlenmiyor** ve sensörün altında pad'ler dışında **bakır yok**
    (datasheet 5.3). Lehimlenmiş bir die pad, sensörün içindeki ısıtıcıyı soğutur (heat sink etkisi).
-3. **Termal izolasyon:** Sensör, kartın geri kalanından freze ile ayrılmış 4.4 mm genişliğinde bir
-   "dil" üzerinde duruyor (Design Guide bölüm 3 / Fig. 8b, 11). Dile sadece 4 adet **0.15 mm**
+3. **Termal izolasyon:** Sensör, kartın geri kalanından iki adet 1.2 mm'lik freze yarığıyla ayrılmış
+   4.4 mm genişliğinde bir "dil" üzerinde duruyor (Design Guide bölüm 3 / Fig. 8b, 11). Dile sadece 4 adet **0.15 mm**
    iz geçiyor. Dilde bakır dolgu (pour) yok. Böylece header'dan ve bağlı karttan gelen ısı sensöre
    daha az ulaşıyor.
 4. **C1, sensörün VDD/VSS pinlerine doğrudan bağlı** (≈0.6 mm uzaklıkta). Isıtıcı çalışırken
@@ -41,7 +41,10 @@ SHT4x* ve *Heater Decontamination SHT4x* ([ürün sayfası](https://sensirion.co
    modül kullanıyorsanız) iki pad arasındaki ince izi maket bıçağıyla kesin. Böylece iki pull-up
    birlikte devreden çıkar.
 6. **Kolay kullanım için yaygın pin sırası** (`VCC GND SCL SDA`). Pin etiketleri iki yüzde de
-   yazılı, 1 numaralı pin kare pad'li.
+   yazılı, 1 numaralı pin kare pad'li. Pin header (J1) ile JST XH (J2) aynı sütunlarda, J2
+   hemen J1'in altında. İkisinden birini ya da ikisini birden takabilirsiniz.
+7. **Montaj delikleri:** Dilin iki yanındaki "kulaklarda" 2 adet M2 delik (2.2 mm, kaplamasız)
+   var. Kulaklar da dile değmiyor, böylece vidalanan yüzeyin sıcaklığı sensöre doğrudan geçmiyor.
 
 ## Dosyalar
 
@@ -66,9 +69,9 @@ bağlı, bu yüzden KiCad'de "Update PCB from Schematic" sorunsuz çalışır.
 2. Önerilen ayarlar: 2 Layers, FR-4, **1.6 mm** (termal kütleyi azaltmak isterseniz 1.0 mm de olur),
    renk serbest, yüzey kaplaması **ENIG** (0.5 × 0.3 mm'lik DFN pad'lerinde daha düz bir yüzey
    sağlar; HASL lead-free de çalışır).
-3. *Remove Order Number* seçeneğini işaretleyin, kart sipariş numarasının basılamayacağı
-   kadar küçük.
-4. Kartta 2 adet 0.3 mm via ve 4 adet 1.0 mm header deliği var, minimum iz/boşluk 0.15 mm.
+3. *Remove Order Number* seçeneğini işaretleyin. Kartta sipariş numarasına uygun boş yer yok.
+4. Kartta 2 adet 0.3 mm via, 8 adet konnektör deliği (1.0 ve 0.95 mm), 2 adet 2.2 mm kaplamasız
+   montaj deliği ve 2 adet 1.2 mm frezelenmiş yarık var. Minimum iz/boşluk 0.15 mm.
    Bunların hepsi standart (ek ücretsiz) üretim sınırları içinde.
 
 ### Montajlı (PCBA), önerilen yöntem
@@ -88,9 +91,9 @@ SHT45 bacaksız, 1.5 mm'lik bir DFN kılıf. Sensirion **elle (havya ile) lehiml
 3. **Önizleme ekranında U1'in yönünü kontrol edin:** pin-1 noktası, kart üstünde sensörün
    **sağ üst köşesindeki** üçgen işaretle aynı yerde olmalı. JLC'nin kütüphanesindeki DFN
    modelleri bazen 90°/180° kaymış gelebiliyor. Gerekirse önizlemede döndürün.
-4. SHT45 stokta yoksa aynı footprint'e sahip **SHT45-AD1F-R2** (C5360602, üstü PTFE membranlı,
-   IP67) kullanılabilir. Parça numaralarını ve stok durumunu sipariş anında kontrol edin.
-5. Header (J1) ve JP1 montaj listesinde yok. Header'ı kendiniz lehimleyin, JP1 zaten bakır bir köprü.
+4. SHT45 stokta yoksa aynı footprint'e sahip **SHT45-AD1F-R2** (C5360602, üstü polyimid filtre
+   zarlı, IP68) kullanılabilir. Parça numaralarını ve stok durumunu sipariş anında kontrol edin.
+5. Konnektörler (J1, J2) ve JP1 montaj listesinde yok. Konnektörleri kendiniz lehimleyin, JP1 zaten bakır bir köprü.
 
 > Not: Kart 10 × 10 mm'den büyük olduğu için tek parça olarak montaja uygun. JLC panelleme
 > isterse sipariş ekranındaki *Panel by JLCPCB* seçeneği yeterli.
@@ -109,6 +112,8 @@ bir sapma görülebilir, 1–3 gün içinde kendiliğinden kaybolur.
 | 2 | 10 kΩ direnç, 0603 | R1, R2 (I²C pull-up) |
 | 1 | 100 nF kondansatör, 0603, X7R, ≥10 V | C1 |
 | 1 | 1×4 erkek pin header, 2.54 mm | J1, isteğe bağlı |
+| 1 | JST XH 4 pin dik soket (B4B-XH-A) | J2, isteğe bağlı. "XH2.54" diye satılan klonlar da oturur |
+| 2 | M2 vida + somun/spacer | İsteğe bağlı |
 
 JP1 bir parça değil, bakır bir köprü. Lehim pastası no-clean olmalı.
 Pasif parçalar 0603 seçildi, elle yerleştirmesi kolay.

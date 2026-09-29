@@ -48,6 +48,7 @@ PINS = {
     "Sensor_Humidity:SHT4x": {"1": (-7.62, -2.54, 0), "2": (-7.62, 2.54, 0),
                               "3": (2.54, 7.62, 270), "4": (2.54, -7.62, 90)},
     "power:PWR_FLAG": {"1": (0, 0, 90)},
+    "Mechanical:MountingHole": {},
     "Device:R": {"1": (0, 3.81, 270), "2": (0, -3.81, 90)},
     "Device:C": {"1": (0, 3.81, 270), "2": (0, -3.81, 90)},
     "Jumper:SolderJumper_2_Bridged": {"1": (-3.81, 0, 0), "2": (3.81, 0, 180)},
@@ -184,6 +185,28 @@ pwr_flag(px + 15.24, py + 10.16, "gnd", left=True)
 connect(CONN, HX, HY, "3", "SCL", mirror=True)
 connect(CONN, HX, HY, "4", "SDA", mirror=True)
 
+# J2: JST XH, same pin order as J1
+XX, XY = 63.5, 66.04
+symbol(CONN, "J2", "XH", XX, XY,
+       footprint="Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical",
+       ref_at=(XX - 1.27, XY - 5.08), val_at=(XX - 1.27, XY + 8.89), mirror=True)
+px, py, _, _ = pin_end(CONN, XX, XY, "1", True)
+wire(px, py, px + 5.08, py)
+wire(px + 5.08, py, px + 5.08, py - 5.08)
+power("VCC", px + 5.08, py - 5.08)
+px, py, _, _ = pin_end(CONN, XX, XY, "2", True)
+wire(px, py, px + 15.24, py)
+wire(px + 15.24, py, px + 15.24, py + 12.7)
+power("GND", px + 15.24, py + 12.7)
+connect(CONN, XX, XY, "3", "SCL", mirror=True)
+connect(CONN, XX, XY, "4", "SDA", mirror=True)
+
+# ---------------------------------------------------------------- mounting holes
+for i, x in enumerate((190.5, 203.2)):
+    symbol("Mechanical:MountingHole", "H%d" % (i + 1), "M2", x, 63.5,
+           footprint="MountingHole:MountingHole_2.2mm_M2", in_bom=False,
+           ref_at=(x + 2.54, 62.23), val_at=(x + 2.54, 64.77))
+
 # ---------------------------------------------------------------- pull-ups
 for ref, x, net in (("R1", 101.6, "SDA"), ("R2", 111.76, "SCL")):
     y = 88.9
@@ -220,7 +243,7 @@ connect("Device:C", CX, CY, "2", "GND")
 
 # ---------------------------------------------------------------- notes
 text("SHT45 I2C breakout", 50.8, 50.8, size=2.54)
-text("J1 pinout: 1=VCC  2=GND  3=SCL  4=SDA\n"
+text("J1 (2.54 mm header) / J2 (JST XH 2.50 mm): 1=VCC  2=GND  3=SCL  4=SDA\n"
      "VCC = 1.08 ... 3.6 V  (NOT 5 V tolerant!)\n"
      "I2C address 0x44 (SHT45-AD1B), up to 1 MHz (Fm+)", 50.8, 114.3)
 text("R1/R2: 10k pull-ups as in datasheet Fig.1 (Rp >= 390R @ VDD >= 1.62V).\n"
@@ -233,13 +256,14 @@ text("C1: 100nF placed directly at U1 VDD/VSS (datasheet Fig.1).\n"
 # ---------------------------------------------------------------- write
 libs = [("Sensor_Humidity", "SHT4x"), ("Device", "R"), ("Device", "C"),
         ("Jumper", "SolderJumper_2_Bridged"), ("Connector_Generic", "Conn_01x04"),
-        ("power", "VCC"), ("power", "GND"), ("power", "PWR_FLAG")]
+        ("power", "VCC"), ("power", "GND"), ("power", "PWR_FLAG"),
+        ("Mechanical", "MountingHole")]
 out = "(kicad_sch (version 20230121) (generator eeschema)\n\n"
 out += "  (uuid %s)\n\n" % ROOT_UUID
 out += '  (paper "A4")\n\n'
 out += ('  (title_block\n    (title "SHT45 Breakout")\n    (date "2026-09-29")\n    (rev "1.0")\n'
         '    (comment 1 "Sensirion SHT45 humidity & temperature sensor, I2C")\n'
-        '    (comment 2 "Board 10.2 x 12.5 mm, 2 layers")\n  )\n\n')
+        '    (comment 2 "Board 16.0 x 19.8 mm, 2 layers, 2x M2 holes")\n  )\n\n')
 out += "  (lib_symbols\n"
 for lib, name in libs:
     out += "    " + lib_symbol(lib, name).replace("\n", "\n    ") + "\n"

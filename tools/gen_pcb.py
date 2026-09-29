@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Generate the KiCad 7 PCB (hardware/sht45_breakout.kicad_pcb) with pcbnew.
 
-Board: 10.2 x 12.5 mm, 2 layers. The SHT45 sits on a 4.4 mm wide tongue that is
-separated from the header area by milled cut-outs (Sensirion Design Guide,
-ch. 3 / Fig. 8b), with only four thin traces crossing over.
+Board: 16.0 x 19.8 mm, 2 layers. The SHT45 sits on a 4.4 mm wide tongue that is
+separated from the rest of the board by milled slots (Sensirion Design Guide,
+ch. 3 / Fig. 8b), with only four thin traces crossing over. Two "ears" either
+side of the tongue carry M2 mounting holes; a 2.54 mm pin header and a JST XH
+connector share the same pin order at the bottom edge.
 
 Coordinates are in mm, KiCad convention (y grows downwards). The board's
 top-left corner is at (100, 100).
@@ -27,14 +29,18 @@ def P(x, y):
 
 # ------------------------------------------------------------------ geometry
 X0, Y0 = 100.0, 100.0
-W, H = 10.2, 12.5
-TONGUE_L, TONGUE_R = 102.9, 107.3  # 4.4 mm wide sensor tongue
-BASE_TOP = 106.0                    # tongue: y 100..106, base: y 106..112.5
+W, H = 16.0, 19.8
+TONGUE_L, TONGUE_R = 105.8, 110.2  # 4.4 mm wide sensor tongue
+SLOT_W = 1.2                        # milled slot between tongue and ears
+BASE_TOP = 106.0                    # tongue/ears: y 100..106, base: y 106..119.8
 R_CORNER = 0.5
+HOLES = [(102.3, 102.6), (113.7, 102.6)]  # M2, centred in the ears
 
-SX, SY = 104.7, 102.4               # U1 centre
+SX, SY = 107.6, 102.4               # U1 centre
 HDR_Y = 111.1
-HDR_X = [101.29, 103.83, 106.37, 108.91]  # J1 pins 1..4 (VCC GND SCL SDA)
+HDR_X = [104.19, 106.73, 109.27, 111.81]  # J1 pins 1..4 (VCC GND SCL SDA)
+XH_Y = 115.75
+XH_X = [104.25, 106.75, 109.25, 111.75]   # J2 (JST XH, 2.50 mm) pins 1..4
 
 W_TONGUE = 0.15                     # thin traces on the tongue (less heat flow)
 W_SIG = 0.20
@@ -70,7 +76,7 @@ tb = board.GetTitleBlock()
 tb.SetTitle("SHT45 Breakout")
 tb.SetRevision("1.0")
 tb.SetDate("2026-09-29")
-tb.SetComment(0, "10.2 x 12.5 mm, 2 layers, 1.6 mm FR4, HASL/ENIG")
+tb.SetComment(0, "16.0 x 19.8 mm, 2 layers, 1.6 mm FR4, HASL/ENIG")
 
 # ------------------------------------------------------------------ nets
 NETS = {}
@@ -127,8 +133,9 @@ def rounded_outline(pts, r):
 
 
 rounded_outline([
-    (TONGUE_L, Y0), (TONGUE_R, Y0), (TONGUE_R, BASE_TOP), (X0 + W, BASE_TOP),
-    (X0 + W, Y0 + H), (X0, Y0 + H), (X0, BASE_TOP), (TONGUE_L, BASE_TOP),
+    (X0, Y0), (TONGUE_L - SLOT_W, Y0), (TONGUE_L - SLOT_W, BASE_TOP), (TONGUE_L, BASE_TOP),
+    (TONGUE_L, Y0), (TONGUE_R, Y0), (TONGUE_R, BASE_TOP), (TONGUE_R + SLOT_W, BASE_TOP),
+    (TONGUE_R + SLOT_W, Y0), (X0 + W, Y0), (X0 + W, Y0 + H), (X0, Y0 + H),
 ], R_CORNER)
 
 # ------------------------------------------------------------------ footprints
@@ -178,15 +185,21 @@ U1 = place("Sensor_Humidity", "Sensirion_DFN-4_1.5x1.5mm_P0.8mm_SHT4x_NoCentralP
 C1 = place("Capacitor_SMD", "C_0603_1608Metric", "C1", "100nF", SX, SY + 2.0, 0,
            {"1": "VCC", "2": "GND"}, {"LCSC": "C14663"})
 # Pull-ups stacked on the right, pad 1 (PU) facing the board edge
-R2 = place("Resistor_SMD", "R_0603_1608Metric", "R2", "10k", 108.6, 106.8, 180,
+R2 = place("Resistor_SMD", "R_0603_1608Metric", "R2", "10k", 111.5, 106.8, 180,
            {"1": "/PU", "2": "/SCL"}, {"LCSC": "C25804"})
-R1 = place("Resistor_SMD", "R_0603_1608Metric", "R1", "10k", 108.6, 108.45, 180,
+R1 = place("Resistor_SMD", "R_0603_1608Metric", "R1", "10k", 111.5, 108.45, 180,
            {"1": "/PU", "2": "/SDA"}, {"LCSC": "C25804"})
 J1 = place("Connector_PinHeader_2.54mm", "PinHeader_1x04_P2.54mm_Vertical", "J1", "I2C",
            HDR_X[0], HDR_Y, 90, {"1": "VCC", "2": "GND", "3": "/SCL", "4": "/SDA"},
            attrs=pcbnew.FP_EXCLUDE_FROM_POS_FILES)
+J2 = place("Connector_JST", "JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical", "J2", "XH",
+           XH_X[0], XH_Y, 0, {"1": "VCC", "2": "GND", "3": "/SCL", "4": "/SDA"},
+           attrs=pcbnew.FP_EXCLUDE_FROM_POS_FILES)
+MH = [place("MountingHole", "MountingHole_2.2mm_M2", "H%d" % (i + 1), "M2", x, y, 0, {},
+            attrs=pcbnew.FP_EXCLUDE_FROM_POS_FILES | pcbnew.FP_EXCLUDE_FROM_BOM)
+      for i, (x, y) in enumerate(HOLES)]
 JP1 = place("Jumper", "SolderJumper-2_P1.3mm_Bridged_RoundedPad1.0x1.5mm", "JP1", "PULLUP",
-            101.6, 107.3, 0, {"1": "VCC", "2": "/PU"}, bottom=True,
+            104.5, 107.3, 0, {"1": "VCC", "2": "/PU"}, bottom=True,
             attrs=pcbnew.FP_EXCLUDE_FROM_POS_FILES | pcbnew.FP_EXCLUDE_FROM_BOM)
 
 # Pin header silk outline would collide with the pin labels on such a small
@@ -203,6 +216,7 @@ EXPECT = {
     (U1, "1"): (SX + 0.4, SY - 0.7), (U1, "2"): (SX - 0.4, SY - 0.7),
     (U1, "3"): (SX - 0.4, SY + 0.7), (U1, "4"): (SX + 0.4, SY + 0.7),
     (J1, "1"): (HDR_X[0], HDR_Y), (J1, "4"): (HDR_X[3], HDR_Y),
+    (J2, "1"): (XH_X[0], XH_Y), (J2, "4"): (XH_X[3], XH_Y),
 }
 for (fp, num), (ex, ey) in EXPECT.items():
     px, py = pad_xy(fp, num)
@@ -240,8 +254,8 @@ r1_pu, r1_sda = pad_xy(R1, "1"), pad_xy(R1, "2")
 jp_vcc, jp_pu = pad_xy(JP1, "1"), pad_xy(JP1, "2")
 j_vcc, j_gnd, j_scl, j_sda = ((x, HDR_Y) for x in HDR_X)
 
-X_SDA, X_SCL = 106.25, 106.75        # tongue lanes (right side of U1, clear of C1)
-SDA_VIA = (106.0, 108.2)
+X_SDA, X_SCL = 109.15, 109.65        # tongue lanes (right side of U1, clear of C1)
+SDA_VIA = (108.9, 108.2)
 Y_SDA_HOP, Y_SCL_HOP = SY - 1.2, SY - 1.7
 
 # --- tongue (thin traces, nothing under the sensor body)
@@ -274,11 +288,15 @@ track([SDA_VIA, (j_sda[0], SDA_VIA[1] + (j_sda[0] - SDA_VIA[0])), j_sda],
 track([r1_sda, (j_sda[0], r1_sda[1] + (j_sda[0] - r1_sda[0])), j_sda], "/SDA", W_SIG)
 # pull-up common node, then through the bottom-side jumper to VCC
 # (the via sits between the four resistor pads, under the resistor bodies' gap)
-VPU = (108.6, 107.625)
+VPU = (111.5, 107.625)
 via(*VPU, "/PU")
 track([r2_pu, VPU, r1_pu], "/PU", W_SIG)
 track([VPU, (VPU[0] - 0.95, 106.8), (jp_pu[0], 106.8), jp_pu], "/PU", W_SIG, pcbnew.B_Cu)
 track([jp_vcc, (jp_vcc[0], 109.6), (j_vcc[0], 109.9), j_vcc], "VCC", W_PWR, pcbnew.B_Cu)
+# JST XH directly below the pin header, same pin order
+for hx, xx, net, w in zip(HDR_X, XH_X, ("VCC", "GND", "/SCL", "/SDA"),
+                          (W_PWR, W_PWR, W_SIG, W_SIG)):
+    track([(hx, HDR_Y), (xx, XH_Y)], net, w)
 
 # ------------------------------------------------------------------ silkscreen
 
@@ -301,10 +319,10 @@ LABELS = ["VCC", "GND", "SCL", "SDA"]
 for x, lbl in zip(HDR_X, LABELS):
     text(lbl, x, 109.6, pcbnew.F_SilkS, size=0.7)
     text(lbl, x, 109.6, pcbnew.B_SilkS, size=0.7)
-text("SHT45", 105.1, 102.8, pcbnew.B_SilkS, size=0.8, rot=90)
-text("0x44", 106.4, 102.8, pcbnew.B_SilkS, size=0.7, rot=90)
-text("1.1-3.6V", 103.8, 102.9, pcbnew.B_SilkS, size=0.7, rot=90)
-text("PU", 103.85, 107.5, pcbnew.B_SilkS, size=0.7)
+text("SHT45", 108.0, 102.8, pcbnew.B_SilkS, size=0.8, rot=90)
+text("0x44", 109.3, 102.8, pcbnew.B_SilkS, size=0.7, rot=90)
+text("1.1-3.6V", 106.7, 102.9, pcbnew.B_SilkS, size=0.7, rot=90)
+text("PU", 106.75, 107.5, pcbnew.B_SilkS, size=0.7)
 
 # ------------------------------------------------------------------ save
 board.BuildConnectivity()

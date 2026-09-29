@@ -1,10 +1,10 @@
 ** Drc report for /home/user/sht45_breakout/hardware/sht45_breakout.kicad_pcb **
-** Created on 2026-09-29 13:02:47 **
+** Created on 2026-09-29 13:32:47 **
 
 ** Found 1 DRC violations **
 [lib_footprint_mismatch]: Footprint 'PinHeader_1x04_P2.54mm_Vertical' does not match copy in library 'Connector_PinHeader_2.54mm'.
     Local override; Severity: warning
-    @(101.2900 mm, 111.1000 mm): Footprint J1
+    @(104.1900 mm, 111.1000 mm): Footprint J1
 
 ** Found 0 unconnected pads **
 
