@@ -1,4 +1,4 @@
 Comment,Designator,Footprint,LCSC Part #
-100nF,C1,C_0402_1005Metric,C1525
-10k,"R1,R2",R_0402_1005Metric,C25744
+100nF,C1,C_0603_1608Metric,C14663
+10k,"R1,R2",R_0603_1608Metric,C25804
 SHT45-AD1B-R2,U1,Sensirion_DFN-4_1.5x1.5mm_P0.8mm_SHT4x_NoCentralPad,C9900092421

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the KiCad 7 PCB (hardware/sht45_breakout.kicad_pcb) with pcbnew.
 
-Board: 10.2 x 12.5 mm, 2 layers. The SHT45 sits on a 4 mm wide tongue that is
+Board: 10.2 x 12.5 mm, 2 layers. The SHT45 sits on a 4.4 mm wide tongue that is
 separated from the header area by milled cut-outs (Sensirion Design Guide,
 ch. 3 / Fig. 8b), with only four thin traces crossing over.
 
@@ -28,11 +28,11 @@ def P(x, y):
 # ------------------------------------------------------------------ geometry
 X0, Y0 = 100.0, 100.0
 W, H = 10.2, 12.5
-TONGUE_L, TONGUE_R = 103.1, 107.1  # 4.0 mm wide sensor tongue
+TONGUE_L, TONGUE_R = 102.9, 107.3  # 4.4 mm wide sensor tongue
 BASE_TOP = 106.0                    # tongue: y 100..106, base: y 106..112.5
 R_CORNER = 0.5
 
-SX, SY = 104.75, 102.4              # U1 centre
+SX, SY = 104.7, 102.4               # U1 centre
 HDR_Y = 111.1
 HDR_X = [101.29, 103.83, 106.37, 108.91]  # J1 pins 1..4 (VCC GND SCL SDA)
 
@@ -175,12 +175,13 @@ U1 = place("Sensor_Humidity", "Sensirion_DFN-4_1.5x1.5mm_P0.8mm_SHT4x_NoCentralP
            "U1", "SHT45-AD1B-R2", SX, SY, -90,
            {"1": "/SDA", "2": "/SCL", "3": "VCC", "4": "GND"},
            {"LCSC": "C9900092421", "MPN": "SHT45-AD1B-R2"})
-C1 = place("Capacitor_SMD", "C_0402_1005Metric", "C1", "100nF", SX, SY + 1.7, 0,
-           {"1": "VCC", "2": "GND"}, {"LCSC": "C1525"})
-R2 = place("Resistor_SMD", "R_0402_1005Metric", "R2", "10k", 107.75, 108.2, -90,
-           {"1": "/PU", "2": "/SCL"}, {"LCSC": "C25744"})
-R1 = place("Resistor_SMD", "R_0402_1005Metric", "R1", "10k", 108.91, 108.2, -90,
-           {"1": "/PU", "2": "/SDA"}, {"LCSC": "C25744"})
+C1 = place("Capacitor_SMD", "C_0603_1608Metric", "C1", "100nF", SX, SY + 2.0, 0,
+           {"1": "VCC", "2": "GND"}, {"LCSC": "C14663"})
+# Pull-ups stacked on the right, pad 1 (PU) facing the board edge
+R2 = place("Resistor_SMD", "R_0603_1608Metric", "R2", "10k", 108.6, 106.8, 180,
+           {"1": "/PU", "2": "/SCL"}, {"LCSC": "C25804"})
+R1 = place("Resistor_SMD", "R_0603_1608Metric", "R1", "10k", 108.6, 108.45, 180,
+           {"1": "/PU", "2": "/SDA"}, {"LCSC": "C25804"})
 J1 = place("Connector_PinHeader_2.54mm", "PinHeader_1x04_P2.54mm_Vertical", "J1", "I2C",
            HDR_X[0], HDR_Y, 90, {"1": "VCC", "2": "GND", "3": "/SCL", "4": "/SDA"},
            attrs=pcbnew.FP_EXCLUDE_FROM_POS_FILES)
@@ -239,7 +240,8 @@ r1_pu, r1_sda = pad_xy(R1, "1"), pad_xy(R1, "2")
 jp_vcc, jp_pu = pad_xy(JP1, "1"), pad_xy(JP1, "2")
 j_vcc, j_gnd, j_scl, j_sda = ((x, HDR_Y) for x in HDR_X)
 
-X_SDA, X_SCL = 105.95, 106.55        # tongue lanes (right side of U1)
+X_SDA, X_SCL = 106.25, 106.75        # tongue lanes (right side of U1, clear of C1)
+SDA_VIA = (106.0, 108.2)
 Y_SDA_HOP, Y_SCL_HOP = SY - 1.2, SY - 1.7
 
 # --- tongue (thin traces, nothing under the sensor body)
@@ -248,7 +250,8 @@ track([u_vdd, c_vcc], "VCC", W_TONGUE)
 track([u_vss, c_gnd], "GND", W_TONGUE)
 # SDA: up out of the pad, over to its lane, down
 track([u_sda, (u_sda[0], Y_SDA_HOP + 0.2), (u_sda[0] + 0.2, Y_SDA_HOP),
-       (X_SDA - 0.2, Y_SDA_HOP), (X_SDA, Y_SDA_HOP + 0.2), (X_SDA, 107.9)], "/SDA", W_TONGUE)
+       (X_SDA - 0.2, Y_SDA_HOP), (X_SDA, Y_SDA_HOP + 0.2), (X_SDA, BASE_TOP + 0.5)],
+      "/SDA", W_TONGUE)
 # SCL: up, over the top of U1 (outside SDA), down its lane to the header
 track([u_scl, (u_scl[0], Y_SCL_HOP + 0.2), (u_scl[0] + 0.2, Y_SCL_HOP),
        (X_SCL - 0.2, Y_SCL_HOP), (X_SCL, Y_SCL_HOP + 0.2), (X_SCL, BASE_TOP + 0.5)],
@@ -259,21 +262,22 @@ track([c_vcc, (c_vcc[0], BASE_TOP + 0.2)], "VCC", W_TONGUE)
 track([c_gnd, (c_gnd[0], BASE_TOP + 0.2)], "GND", W_TONGUE)
 track([(c_vcc[0], BASE_TOP + 0.2), (c_vcc[0], BASE_TOP + 0.6),
        (j_vcc[0], BASE_TOP + 0.6 + (c_vcc[0] - j_vcc[0])), j_vcc], "VCC", W_PWR)
-track([(c_gnd[0], BASE_TOP + 0.2), (c_gnd[0], BASE_TOP + 1.4),
-       (j_gnd[0], BASE_TOP + 1.4 + (c_gnd[0] - j_gnd[0])), j_gnd], "GND", W_PWR)
+track([(c_gnd[0], BASE_TOP + 0.2), (c_gnd[0], BASE_TOP + 1.0),
+       (j_gnd[0], BASE_TOP + 1.0 + (c_gnd[0] - j_gnd[0])), j_gnd], "GND", W_PWR)
 track([(X_SCL, BASE_TOP + 0.5), (X_SCL, r2_scl[1]), (X_SCL, 110.0), j_scl], "/SCL", W_SIG)
 track([(X_SCL, r2_scl[1]), r2_scl], "/SCL", W_SIG)
 # SDA hops to the bottom layer under SCL and joins the header pin + R1
-via(X_SDA, 107.9, "/SDA")
-track([(X_SDA, 107.9), (X_SDA + (j_sda[0] - X_SDA), 107.9 + (j_sda[0] - X_SDA)), j_sda],
+track([(X_SDA, BASE_TOP + 0.5), (SDA_VIA[0], BASE_TOP + 0.75), SDA_VIA], "/SDA", W_SIG)
+via(*SDA_VIA, "/SDA")
+track([SDA_VIA, (j_sda[0], SDA_VIA[1] + (j_sda[0] - SDA_VIA[0])), j_sda],
       "/SDA", W_SIG, pcbnew.B_Cu)
-track([r1_sda, j_sda], "/SDA", W_SIG)
+track([r1_sda, (j_sda[0], r1_sda[1] + (j_sda[0] - r1_sda[0])), j_sda], "/SDA", W_SIG)
 # pull-up common node, then through the bottom-side jumper to VCC
-track([r2_pu, r1_pu], "/PU", W_SIG)
-VPU = (108.33, 106.85)
+# (the via sits between the four resistor pads, under the resistor bodies' gap)
+VPU = (108.6, 107.625)
 via(*VPU, "/PU")
-track([VPU, (VPU[0], r2_pu[1])], "/PU", W_SIG)
-track([VPU, (jp_pu[0], VPU[1]), jp_pu], "/PU", W_SIG, pcbnew.B_Cu)
+track([r2_pu, VPU, r1_pu], "/PU", W_SIG)
+track([VPU, (VPU[0] - 0.95, 106.8), (jp_pu[0], 106.8), jp_pu], "/PU", W_SIG, pcbnew.B_Cu)
 track([jp_vcc, (jp_vcc[0], 109.6), (j_vcc[0], 109.9), j_vcc], "VCC", W_PWR, pcbnew.B_Cu)
 
 # ------------------------------------------------------------------ silkscreen
@@ -299,7 +303,7 @@ for x, lbl in zip(HDR_X, LABELS):
     text(lbl, x, 109.6, pcbnew.B_SilkS, size=0.7)
 text("SHT45", 105.1, 102.8, pcbnew.B_SilkS, size=0.8, rot=90)
 text("0x44", 106.4, 102.8, pcbnew.B_SilkS, size=0.7, rot=90)
-text("1.1-3.6V", 106.2, 108.5, pcbnew.B_SilkS, size=0.7)
+text("1.1-3.6V", 103.2, 108.55, pcbnew.B_SilkS, size=0.7)
 text("PU", 103.85, 107.5, pcbnew.B_SilkS, size=0.7)
 
 # ------------------------------------------------------------------ save

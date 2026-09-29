@@ -9,7 +9,7 @@ Sensirion **SHT45** (±1.0 %RH, ±0.1 °C, I²C) nem ve sıcaklık sensörü iç
 | Besleme | **1.08 … 3.6 V** (5 V ile çalışmaz, aşağıya bakın) |
 | Arayüz | I²C, adres **0x44** (SHT45-AD1B), en fazla 1 MHz (Fm+) |
 | Konnektör | 1×4, 2.54 mm pin header: `VCC GND SCL SDA` |
-| Parçalar | U1 SHT45 (DFN-4 1.5×1.5), C1 100 nF 0402, R1/R2 10 kΩ 0402, JP1 lehim köprüsü |
+| Parçalar | U1 SHT45 (DFN-4 1.5×1.5), C1 100 nF 0603, R1/R2 10 kΩ 0603, JP1 lehim köprüsü |
 
 ![Üst yüz](docs/gerber_top.png) ![Alt yüz](docs/gerber_bottom.png)
 
@@ -30,11 +30,11 @@ SHT4x* ve *Heater Decontamination SHT4x* ([ürün sayfası](https://sensirion.co
    yatay aralık (KiCad'deki `Sensirion_DFN-4_…_SHT4x_NoCentralPad` footprint'i).
    **Orta pad (die pad) lehimlenmiyor** ve sensörün altında pad'ler dışında **bakır yok**
    (datasheet 5.3). Lehimlenmiş bir die pad, sensörün içindeki ısıtıcıyı soğutur (heat sink etkisi).
-3. **Termal izolasyon:** Sensör, kartın geri kalanından freze ile ayrılmış 4 mm genişliğinde bir
+3. **Termal izolasyon:** Sensör, kartın geri kalanından freze ile ayrılmış 4.4 mm genişliğinde bir
    "dil" üzerinde duruyor (Design Guide bölüm 3 / Fig. 8b, 11). Dile sadece 4 adet **0.15 mm**
    iz geçiyor. Dilde bakır dolgu (pour) yok. Böylece header'dan ve bağlı karttan gelen ısı sensöre
    daha az ulaşıyor.
-4. **C1, sensörün VDD/VSS pinlerine doğrudan bağlı** (≈0.5 mm uzaklıkta). Isıtıcı çalışırken
+4. **C1, sensörün VDD/VSS pinlerine doğrudan bağlı** (≈0.6 mm uzaklıkta). Isıtıcı çalışırken
    çekilen 100 mA'e varan akım darbeleri için bu yakınlık önemli.
 5. **Pull-up'lar ve lehim köprüsü ana gövdede**, sensörden uzakta. **JP1** (alt yüzde, "PU")
    fabrikadan kapalı (köprülü) gelir. Aynı I²C hattında zaten pull-up varsa (ör. birden fazla
@@ -82,8 +82,8 @@ SHT45 bacaksız, 1.5 mm'lik bir DFN kılıf. Sensirion **elle (havya ile) lehiml
    | Ref | Parça | LCSC |
    |---|---|---|
    | U1 | SHT45-AD1B-R2 | C9900092421 |
-   | C1 | 100 nF 0402 X7R | C1525 (basic) |
-   | R1, R2 | 10 kΩ 0402 1% | C25744 (basic) |
+   | C1 | 100 nF 0603 X7R | C14663 (basic) |
+   | R1, R2 | 10 kΩ 0603 1% | C25804 (basic) |
 
 3. **Önizleme ekranında U1'in yönünü kontrol edin:** pin-1 noktası, kart üstünde sensörün
    **sağ üst köşesindeki** üçgen işaretle aynı yerde olmalı. JLC'nin kütüphanesindeki DFN
@@ -100,6 +100,18 @@ Stencil ile no-clean pasta (Type 3 veya daha ince) sürüp hot-plate ya da sıca
 (tepe sıcaklık ≤ 260 °C). **Kartı yıkamayın, IPA ya da flux temizleyici kullanmayın**
 (Handling Instructions: "Do not apply board wash"). Reflow'dan sonra ölçümde −1…−2 %RH'lik
 bir sapma görülebilir, 1–3 gün içinde kendiliğinden kaybolur.
+
+### Kendin dizmek için malzeme listesi (1 kart)
+
+| Adet | Parça | Not |
+|---|---|---|
+| 1 | SHT45-AD1F-R2 veya SHT45-AD1B-R2 | F = üstü filtre zarlı, B = açık kılıf. Aynı footprint |
+| 2 | 10 kΩ direnç, 0603 | R1, R2 (I²C pull-up) |
+| 1 | 100 nF kondansatör, 0603, X7R, ≥10 V | C1 |
+| 1 | 1×4 erkek pin header, 2.54 mm | J1, isteğe bağlı |
+
+JP1 bir parça değil, bakır bir köprü. Lehim pastası no-clean olmalı.
+Pasif parçalar 0603 seçildi, elle yerleştirmesi kolay.
 
 ## Kullanım
 

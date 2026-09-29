@@ -187,8 +187,8 @@ connect(CONN, HX, HY, "4", "SDA", mirror=True)
 # ---------------------------------------------------------------- pull-ups
 for ref, x, net in (("R1", 101.6, "SDA"), ("R2", 111.76, "SCL")):
     y = 88.9
-    symbol("Device:R", ref, "10k", x, y, footprint="Resistor_SMD:R_0402_1005Metric",
-           fields={LCSC: "C25744", "Tolerance": "1%"},
+    symbol("Device:R", ref, "10k", x, y, footprint="Resistor_SMD:R_0603_1608Metric",
+           fields={LCSC: "C25804", "Tolerance": "1%"},
            ref_at=(x + 2.54, y - 1.27), val_at=(x + 2.54, y + 1.27))
     connect("Device:R", x, y, "1", "PU")
     connect("Device:R", x, y, "2", net)
@@ -212,8 +212,8 @@ connect("Sensor_Humidity:SHT4x", UX, UY, "4", "GND")
 
 # ---------------------------------------------------------------- decoupling
 CX, CY = 167.64, 88.9
-symbol("Device:C", "C1", "100nF", CX, CY, footprint="Capacitor_SMD:C_0402_1005Metric",
-       fields={LCSC: "C1525", "Voltage": "16V", "Dielectric": "X7R"},
+symbol("Device:C", "C1", "100nF", CX, CY, footprint="Capacitor_SMD:C_0603_1608Metric",
+       fields={LCSC: "C14663", "Voltage": "50V", "Dielectric": "X7R"},
        ref_at=(CX + 2.54, CY - 1.27), val_at=(CX + 2.54, CY + 1.27))
 connect("Device:C", CX, CY, "1", "VCC")
 connect("Device:C", CX, CY, "2", "GND")
