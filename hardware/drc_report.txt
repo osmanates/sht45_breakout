@@ -1,19 +1,7 @@
 ** Drc report for /home/user/sht45_breakout/hardware/sht45_breakout.kicad_pcb **
-** Created on 2026-09-29 13:02:32 **
+** Created on 2026-09-29 13:02:47 **
 
-** Found 4 DRC violations **
-[silk_overlap]: Silkscreen overlap
-    Rule: board setup constraints silk; Severity: warning
-    @(103.2000 mm, 108.5500 mm): PCB Text '1.1-3.6V' on B.Silkscreen
-    @(100.9000 mm, 108.3000 mm): Line on B.Silkscreen
-[silk_overlap]: Silkscreen overlap
-    Rule: board setup constraints silk; Severity: warning
-    @(103.2000 mm, 108.5500 mm): PCB Text '1.1-3.6V' on B.Silkscreen
-    @(100.9000 mm, 107.6000 mm): Arc on B.Silkscreen
-[silk_overlap]: Silkscreen overlap
-    Rule: board setup constraints silk; Severity: warning
-    @(102.3000 mm, 107.6000 mm): Arc on B.Silkscreen
-    @(103.2000 mm, 108.5500 mm): PCB Text '1.1-3.6V' on B.Silkscreen
+** Found 1 DRC violations **
 [lib_footprint_mismatch]: Footprint 'PinHeader_1x04_P2.54mm_Vertical' does not match copy in library 'Connector_PinHeader_2.54mm'.
     Local override; Severity: warning
     @(101.2900 mm, 111.1000 mm): Footprint J1

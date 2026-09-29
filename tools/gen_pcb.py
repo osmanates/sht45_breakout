@@ -303,7 +303,7 @@ for x, lbl in zip(HDR_X, LABELS):
     text(lbl, x, 109.6, pcbnew.B_SilkS, size=0.7)
 text("SHT45", 105.1, 102.8, pcbnew.B_SilkS, size=0.8, rot=90)
 text("0x44", 106.4, 102.8, pcbnew.B_SilkS, size=0.7, rot=90)
-text("1.1-3.6V", 103.2, 108.55, pcbnew.B_SilkS, size=0.7)
+text("1.1-3.6V", 103.8, 102.9, pcbnew.B_SilkS, size=0.7, rot=90)
 text("PU", 103.85, 107.5, pcbnew.B_SilkS, size=0.7)
 
 # ------------------------------------------------------------------ save
